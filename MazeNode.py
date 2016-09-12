@@ -126,7 +126,27 @@ class MazeNode:
     # defines method for getting bottomWalkable value
     def getBottomWalkable(self):
         return self.bottomWalkable
-
+	
+	# defines method for knowing if this node is to the left of anotherNode
+	def isLeftOf(self, anotherNode):
+	    # if MazeNode is left of anotherNode then return True
+        return ((self.getRowPosition() == anotherNode.getRowPosition()) and (self.getColPosition() + 1 == anotherNode.getColPosition()))
+	
+	# defines method for knowing if this node is to the right of anotherNode
+	def isRightOf(self, anotherNode):
+	    # if MazeNode is right of anotherNode then return True
+        return ((self.getRowPosition() == anotherNode.getRowPosition()) and (self.getColPosition() - 1 == anotherNode.getColPosition()))
+	
+	# defines method for knowing if this node is above anotherNode
+	def isAboveOf(self, anotherNode):
+	    # if MazeNode is above of anotherNode then return True
+        return ((self.getRowPosition() + 1 == anotherNode.getRowPosition()) and (self.getColPosition() == anotherNode.getColPosition()))
+	
+	# defines method for knowing if this node is below anotherNode
+	def isBelowOf(self, anotherNode):
+	    # if MazeNode is below of anotherNode then return True
+        return ((self.getRowPosition() - 1 == anotherNode.getRowPosition()) and (self.getColPosition() == anotherNode.getColPosition()))
+	
     # defines method for knowing if a path can be made to the Maze Node's left neighbor
     def setLeftOpenable(self, boolean):
         self.leftOpenable = boolean
