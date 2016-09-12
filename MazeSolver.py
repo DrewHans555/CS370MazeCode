@@ -1,7 +1,6 @@
 # This class generates a Maze
 
 from Maze import Maze
-from MazeNode import MazeNode
 
 
 class MazeSolver:
@@ -9,6 +8,7 @@ class MazeSolver:
     def __init__(self, mazeRows, mazeCols):
         self.listOfMazeNodes = []
         self.generateMaze(mazeRows, mazeCols)
+        self.printMazeNodes()
 
     # defines representation for Python Interpreter
     def __repr__(self):
@@ -19,5 +19,13 @@ class MazeSolver:
         # get the list of MazeNodes from new
         self.listOfMazeNodes = Maze(totalRows, totalCols).getMazeArray()
 
+    #
+    def printMazeNodes(self):
+        print(self.listOfMazeNodes)
+        print(self.listOfMazeNodes[10].getLeftWalkable())
+        print(self.listOfMazeNodes[10].getRightWalkable())
+        print(self.listOfMazeNodes[10].getTopWalkable())
+        print(self.listOfMazeNodes[10].getBottomWalkable())
 
-MazeSolver(50, 50)
+
+MazeSolver(25, 25)
