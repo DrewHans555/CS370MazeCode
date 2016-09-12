@@ -82,15 +82,17 @@ class Maze:
         if (bottomNeighborRowPos is not None) and (bottomNeighborColPos is not None):
             neighborNodesIndex.append(self.getNodeNeighborIndex(bottomNeighborRowPos, bottomNeighborColPos))
 
-        # randomize list of neighborNodesIndex to ensure random paths are generated
-        shuffle(neighborNodesIndex)
+        # if you reach a dead end then do nothing and backtrack to previous node
+        if neighborNodesIndex:
+            # randomize list of neighborNodesIndex to ensure random paths are generated
+            shuffle(neighborNodesIndex)
 
-        # check every neighbor at least once
-        for x in range(len(neighborNodesIndex)):
-            # if neighbor x has not been visited then tear down the wall between it and node
-            if (self.mazeArray[neighborNodesIndex[x]] not in self.listOfVisitedNodes):
-                self.destroyWallBetweenNodes(node, self.mazeArray[neighborNodesIndex[x]])
-                self.buildPaths(self.mazeArray[neighborNodesIndex[x]])
+            # check every neighbor at least once
+            for x in range(len(neighborNodesIndex)):
+                # if neighbor x has not been visited then tear down the wall between it and node
+                if (self.mazeArray[neighborNodesIndex[x]] not in self.listOfVisitedNodes):
+                    self.destroyWallBetweenNodes(node, self.mazeArray[neighborNodesIndex[x]])
+                    self.buildPaths(self.mazeArray[neighborNodesIndex[x]])
 
     # defines method for getting a node's neighbor's mazeArray index
     def getNodeNeighborIndex(self, neighborRowPos, neighborColPos):
