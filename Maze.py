@@ -10,7 +10,7 @@ class Maze:
     # defines constructor for Maze class
     def __init__(self, totalRows=0, totalCols=0):
         self.mazeArray = []
-        self.listOfVisitedNodes = []
+        self.visitedNodesIndexs = []
         self.totalRows = totalRows
         self.totalCols = totalCols
 
@@ -22,7 +22,7 @@ class Maze:
         self.setMazeBounds()  # set the maze boundaries
 
         randomNode = self.mazeArray[randrange(len(self.mazeArray))]
-        self.buildPaths(randomNode)  # build paths using recursion
+        self.buildPaths(randomNode, -1)  # build paths using recursion
 
         self.printMazePicture()
 
@@ -59,9 +59,9 @@ class Maze:
                 currentNode.setRightOpenable(False)
 
     # defines method for building paths using a recursive depth-first-search algorithm
-    def buildPaths(self, node):
-        self.listOfVisitedNodes.append(node)
-        neighborNodesIndex = []
+    def buildPaths(self, node, previousIndex):
+        self.visitedNodesIndexs.append(node)
+        neighborNodesIndexs = []
 
         leftNeighborRowPos = node.getLeftNeighborRowPosition()
         leftNeighborColPos = node.getLeftNeighborColPosition()
@@ -71,65 +71,70 @@ class Maze:
         topNeighborColPos = node.getTopNeighborColPosition()
         bottomNeighborRowPos = node.getBottomNeighborRowPosition(self.totalRows)
         bottomNeighborColPos = node.getBottomNeighborColPosition(self.totalRows)
+		
+		leftNeighborIndex = self.getNodeIndex(leftNeighborRowPos, leftNeighborColPos)
+		rightNeighborIndex = self.getNodeIndex(rightNeighborRowPos, rightNeighborColPos)
+		topNeighborIndex = self.getNodeIndex(topNeighborRowPos, topNeighborColPos)
+		bottomNeighborIndex = self.getNodeIndex(bottomNeighborRowPos, bottomNeighborColPos)
+		
+		
 
-        # if node's neighbor is legal then add it to neighborNodesIndex list
-        if (leftNeighborRowPos is not None) and (leftNeighborColPos is not None):
-            neighborNodesIndex.append(self.getNodeNeighborIndex(leftNeighborRowPos, leftNeighborColPos))
-        if (rightNeighborRowPos is not None) and (rightNeighborColPos is not None):
-            neighborNodesIndex.append(self.getNodeNeighborIndex(rightNeighborRowPos, rightNeighborColPos))
-        if (topNeighborRowPos is not None) and (topNeighborColPos is not None):
-            neighborNodesIndex.append(self.getNodeNeighborIndex(topNeighborRowPos, topNeighborColPos))
-        if (bottomNeighborRowPos is not None) and (bottomNeighborColPos is not None):
-            neighborNodesIndex.append(self.getNodeNeighborIndex(bottomNeighborRowPos, bottomNeighborColPos))
+        # if node's neighbor is legal, exists and isn't the previous visited node, then add it to neighborNodesIndexs
+        if ((leftNeighborRowPos is not None) and (leftNeighborColPos is not None) and (leftNeighborIndex != previousIndex)):
+            neighborNodesIndexs.append(leftNeighborIndex)
+        if ((rightNeighborRowPos is not None) and (rightNeighborColPos is not None) and (rightNeighborIndex != previousIndex)):
+            neighborNodesIndexs.append(rightNeighborIndex)
+        if ((topNeighborRowPos is not None) and (topNeighborColPos is not None) and (topNeighborIndex != previousIndex)):
+            neighborNodesIndexs.append(topNeighborIndex)
+        if ((bottomNeighborRowPos is not None) and (bottomNeighborColPos is not None) and (bottomNeighborIndex != previousIndex)):
+            neighborNodesIndexs.append(bottomNeighborIndex)
 
-        # if you reach a dead end then do nothing and backtrack to previous node
-        if neighborNodesIndex:
-            # randomize list of neighborNodesIndex to ensure random paths are generated
-            shuffle(neighborNodesIndex)
+        # if there are one or more legal neighbor nodes to explore then select one from neighborNodesIndexs 
+		# and destroyWallBetweenNodes then call buildPaths using the new node
+		# else you've reached a dead end and should backtrack to previous node
+        if neighborNodesIndexs:
+            # randomize list of neighborNodesIndexs to ensure random paths are generated
+            shuffle(neighborNodesIndexs)
 
-            # check every neighbor at least once
-            for x in range(len(neighborNodesIndex)):
+            # check every legal neighbor node at least once for a 
+            for x in range(len(neighborNodesIndexs)):
                 # if neighbor x has not been visited then tear down the wall between it and node
-                if (self.mazeArray[neighborNodesIndex[x]] not in self.listOfVisitedNodes):
-                    self.destroyWallBetweenNodes(node, self.mazeArray[neighborNodesIndex[x]])
-                    self.buildPaths(self.mazeArray[neighborNodesIndex[x]])
-
-    # defines method for getting a node's neighbor's mazeArray index
-    def getNodeNeighborIndex(self, neighborRowPos, neighborColPos):
-        # Given an M*N grid with M rows and N columns and given a grid element (R, C), where R
-        # is in [0, M) and C is in [0, N), finding the element's index I in an ordered list
-        # of all grid elements of M*N grid is given by I = R*N + C.
-        return ((neighborRowPos * int(self.totalCols)) + neighborColPos)
+                if (neighborNodesIndexs[x] not in self.visitedNodesIndexs):
+                    self.destroyWallBetweenNodes(node, self.mazeArray[neighborNodesIndexs[x]])
+                    self.buildPaths(self.mazeArray[neighborNodesIndexs[x]], self.getNodeIndex(node))
 
     # defines method for tearing down a node wall
     def destroyWallBetweenNodes(self, node1, node2):
         # if node2 is left of node1 then destroy wall between node2 right and node1 left
-        if ((node2.getRowPosition() == node1.getRowPosition()) and
-                (node2.getColPosition() + 1 == node1.getColPosition())):
+        if node1.isLeftOf(node2):
+            node1.setRightWalkable()
+            node2.setLeftWalkable()
+            
+        # if node2 is right of node1 then destroy wall between node2 left and node1 right
+        if node1.isRightOf(node2):
             node1.setLeftWalkable()
             node2.setRightWalkable()
 
-        # if node2 is right of node1 then destroy wall between node2 left and node1 right
-        if ((node2.getRowPosition() == node1.getRowPosition()) and
-                (node2.getColPosition() - 1 == node1.getColPosition())):
-            node1.setRightWalkable()
-            node2.setLeftWalkable()
-
         # if node2 is top of node1 then destroy wall between node2 bottom and node1 top
-        if ((node2.getColPosition() == node1.getColPosition()) and
-                (node2.getRowPosition() + 1 == node1.getRowPosition())):
-            node1.setTopWalkable()
-            node2.setBottomWalkable()
-
-        # if node2 is bottom of node1 then destroy wall between node2 top and node1 bottom
-        if ((node2.getColPosition() == node1.getColPosition()) and
-                (node2.getRowPosition() - 1 == node1.getColPosition())):
+        if node1.isAboveOf(node2):
             node1.setBottomWalkable()
             node2.setTopWalkable()
+
+        # if node2 is bottom of node1 then destroy wall between node2 top and node1 bottom
+        if node1.isBelowOf(node2):
+            node1.setTopWalkable()
+            node2.setBottomWalkable()
 
     # defines method for getting the mazeArray list
     def getMazeArray(self):
         return self.mazeArray
+
+    # defines method for getting a node's mazeArray index
+    def getNodeIndex(self, rowPos, colPos):
+        # Given an M*N grid with M rows and N columns and given a grid element (R, C), where R
+        # is in [0, M) and C is in [0, N), finding the element's index I in an ordered list
+        # of all grid elements of M*N grid is given by I = R*N + C.
+        return ((rowPos * int(self.totalCols)) + colPos)
 
     # defines method for getting the number of totalNodes in maze
     def getTotalNodes(self):
@@ -143,8 +148,7 @@ class Maze:
     def getTotalCols(self):
         return self.totalCols
 
-        #
-
+    # defines method for printing out a text-picture of the generated maze
     def printMazePicture(self):
         # print one row at a time
         for r in range(self.totalRows):
@@ -170,8 +174,10 @@ class Maze:
                         print("|", end="")
                         print("")
 
-                    if (x == 2 and r == self.totalRows - 1):
+                    if ((x == 2 and r == self.totalRows - 1) and currentNode.getBottomWalkable() == False):
                         print("+--", end="")
-                        if (x == 2 and c == self.totalCols - 1):
-                            print("+", end="")
-                            print("")
+                    if ((x == 2 and r == self.totalRows - 1) and currentNode.getBottomWalkable() == True):
+                        print("+  ", end="")
+                    if ((x == 2 and r == self.totalRows - 1) and c == self.totalCols - 1):
+                        print("+", end="")
+                        print("")
