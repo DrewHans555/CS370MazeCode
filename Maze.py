@@ -3,6 +3,7 @@
 
 from MazeNode import MazeNode
 from random import shuffle, randrange
+import sys
 
 
 class Maze:
@@ -12,11 +13,18 @@ class Maze:
         self.listOfVisitedNodes = []
         self.totalRows = totalRows
         self.totalCols = totalCols
+
+        # reset the recursion limit for large mazes
+        if self.totalRows * self.totalCols > sys.getrecursionlimit():
+            sys.setrecursionlimit(self.totalRows * self.totalCols + 5)
+
         self.addNodes()  # add nodes to the mazeArray
         self.setMazeBounds()  # set the maze boundaries
 
         randomNode = self.mazeArray[randrange(len(self.mazeArray))]
         self.buildPaths(randomNode)  # build paths using recursion
+
+        self.printMazePicture()
 
     # defines representation for Python Interpreter
     def __repr__(self):
@@ -82,14 +90,14 @@ class Maze:
             # if neighbor x has not been visited then tear down the wall between it and node
             if (self.mazeArray[neighborNodesIndex[x]] not in self.listOfVisitedNodes):
                 self.destroyWallBetweenNodes(node, self.mazeArray[neighborNodesIndex[x]])
-                self.buildPaths(neighborNodesIndex[x])
+                self.buildPaths(self.mazeArray[neighborNodesIndex[x]])
 
     # defines method for getting a node's neighbor's mazeArray index
     def getNodeNeighborIndex(self, neighborRowPos, neighborColPos):
         # Given an M*N grid with M rows and N columns and given a grid element (R, C), where R
         # is in [0, M) and C is in [0, N), finding the element's index I in an ordered list
         # of all grid elements of M*N grid is given by I = R*N + C.
-        return neighborRowPos * self.totalCols + neighborColPos
+        return ((neighborRowPos * int(self.totalCols)) + neighborColPos)
 
     # defines method for tearing down a node wall
     def destroyWallBetweenNodes(self, node1, node2):
@@ -132,3 +140,36 @@ class Maze:
     # defines method for getting the number of totalCols in maze
     def getTotalCols(self):
         return self.totalCols
+
+        #
+
+    def printMazePicture(self):
+        # print one row at a time
+        for r in range(self.totalRows):
+            # visit each node in the row 3 times
+            for x in range(3):
+                # for each node in the row print out 3 lines for the tops, middles, and bottoms
+                for c in range(self.totalCols):
+                    # recall: index for a grid item in an ordered list I = rowPos*totalCols + colPos
+                    currentNode = self.mazeArray[r * self.totalCols + c]
+                    if (x == 0 and currentNode.getTopWalkable() == False):
+                        print("+--", end="")
+                    if (x == 0 and currentNode.getTopWalkable() == True):
+                        print("+  ", end="")
+                    if (x == 0 and c == self.totalCols - 1):
+                        print("+", end="")
+                        print("")
+
+                    if (x == 1 and currentNode.getLeftWalkable() == False):
+                        print("|  ", end="")
+                    if (x == 1 and currentNode.getLeftWalkable() == True):
+                        print("   ", end="")
+                    if (x == 1 and c == self.totalCols - 1):
+                        print("|", end="")
+                        print("")
+
+                    if (x == 2 and r == self.totalRows - 1):
+                        print("+--", end="")
+                        if (x == 2 and c == self.totalCols - 1):
+                            print("+", end="")
+                            print("")
