@@ -10,19 +10,19 @@ class Maze:
     # defines constructor for Maze class
     def __init__(self, totalRows=0, totalCols=0):
         self.mazeArray = []
-        self.visitedNodesIndexs = []
+        self.visitedNodesIndexes = []
         self.totalRows = totalRows
         self.totalCols = totalCols
 
-        # reset the recursion limit for large mazes
+        # reset the recursion limit for large mazes to prevent crashing
         if self.totalRows * self.totalCols > sys.getrecursionlimit():
             sys.setrecursionlimit(self.totalRows * self.totalCols + 5)
 
-        self.addNodes()  # add nodes to the mazeArray
-        self.setMazeBounds()  # set the maze boundaries
+        # add nodes to the mazeArray
+        self.addNodes()
 
-        randomNode = self.mazeArray[randrange(len(self.mazeArray))]
-        self.buildPaths(randomNode, -1)  # build paths using recursion
+        # pick a random node and start building paths using recursion
+        self.buildPaths(self.mazeArray[randrange(len(self.mazeArray))])
 
     # defines representation for Python Interpreter
     def __repr__(self):
@@ -37,69 +37,38 @@ class Maze:
 
     # defines method for adding nodes to mazeArray list
     def addNodes(self):
+        index = 0
         for x in range(self.totalRows):
             for y in range(self.totalCols):
-                self.mazeArray.append(MazeNode(x, y))
-
-    # defines method for setting the maze bounds
-    def setMazeBounds(self):
-        for x in range(len(self.mazeArray)):
-            currentNode = self.mazeArray[x]
-            # if node has a side that is a boundary of the maze
-            # then set that side to not be openable
-            if (currentNode.rowPosition == 0):
-                currentNode.setTopOpenable(False)
-            if (currentNode.rowPosition == self.totalRows - 1):
-                currentNode.setBottomOpenable(False)
-            if (currentNode.colPosition == 0):
-                currentNode.setLeftOpenable(False)
-            if (currentNode.colPosition == self.totalCols - 1):
-                currentNode.setRightOpenable(False)
+                self.mazeArray.append(MazeNode(x, y, index))
+                index = index + 1
 
     # defines method for building paths using a recursive depth-first-search algorithm
-    def buildPaths(self, node, previousIndex):
-        self.visitedNodesIndexs.append(self.getNodeIndex(node.getRowPosition(), node.getColPosition()))
-        neighborNodesIndexs = []
+    def buildPaths(self, node):
+        self.visitedNodesIndexes.append(node.getIndexInMazeArray())
+        legalNeighborIndexes = []
 
-        leftNeighborRowPos = node.getLeftNeighborRowPosition()
-        leftNeighborColPos = node.getLeftNeighborColPosition()
-        rightNeighborRowPos = node.getRightNeighborRowPosition(self.totalCols)
-        rightNeighborColPos = node.getRightNeighborColPosition(self.totalCols)
-        topNeighborRowPos = node.getTopNeighborRowPosition()
-        topNeighborColPos = node.getTopNeighborColPosition()
-        bottomNeighborRowPos = node.getBottomNeighborRowPosition(self.totalRows)
-        bottomNeighborColPos = node.getBottomNeighborColPosition(self.totalRows)
+        legalNeighborIndexes = self.getLegalNeighborIndexes(node)
 
-        # if node's neighbor is legal, exists and isn't the previous visited node, then add it to neighborNodesIndexs
-        if ((leftNeighborRowPos is not None) and (leftNeighborColPos is not None) and (
-                self.getNodeIndex(leftNeighborRowPos, leftNeighborColPos) != previousIndex)):
-            neighborNodesIndexs.append(self.getNodeIndex(leftNeighborRowPos, leftNeighborColPos))
-        if ((rightNeighborRowPos is not None) and (rightNeighborColPos is not None) and (
-                self.getNodeIndex(rightNeighborRowPos, rightNeighborColPos) != previousIndex)):
-            neighborNodesIndexs.append(self.getNodeIndex(rightNeighborRowPos, rightNeighborColPos))
-        if ((topNeighborRowPos is not None) and (topNeighborColPos is not None) and (
-                self.getNodeIndex(topNeighborRowPos, topNeighborColPos) != previousIndex)):
-            neighborNodesIndexs.append(self.getNodeIndex(topNeighborRowPos, topNeighborColPos))
-        if ((bottomNeighborRowPos is not None) and (bottomNeighborColPos is not None) and (
-                self.getNodeIndex(bottomNeighborRowPos, bottomNeighborColPos) != previousIndex)):
-            neighborNodesIndexs.append(self.getNodeIndex(bottomNeighborRowPos, bottomNeighborColPos))
-
-        # if there are one or more legal neighbor nodes to explore then select one from neighborNodesIndexs 
+        # if there are one or more legal neighbor nodes to explore then select one from neighborNodesIndexes
         # and destroyWallBetweenNodes then call buildPaths using the new node
         # else you've reached a dead end and should backtrack to previous node
-        if not neighborNodesIndexs:
+        if not legalNeighborIndexes:
+            # if there are no legal neighbor nodes then backtrack to previous node
             pass
         else:
-            # randomize list of neighborNodesIndexs to ensure random paths are generated
-            shuffle(neighborNodesIndexs)
+            # if there are is one or more legal neighbor nodes to explore
+            # then randomly pick one and buildPaths recursively
 
-            # check every legal neighbor node at least once for a 
-            for x in range(len(neighborNodesIndexs)):
+            # randomize list of neighborNodesIndexes to ensure random paths are generated
+            shuffle(legalNeighborIndexes)
+
+            # check every neighbor node at least once for an unvisited node to buildPaths
+            for x in range(len(legalNeighborIndexes)):
                 # if neighbor x has not been visited then tear down the wall between it and node
-                if (neighborNodesIndexs[x] not in self.visitedNodesIndexs):
-                    self.destroyWallBetweenNodes(node, self.mazeArray[neighborNodesIndexs[x]])
-                    self.buildPaths(self.mazeArray[neighborNodesIndexs[x]],
-                                    self.getNodeIndex(node.getRowPosition(), node.getColPosition()))
+                if (legalNeighborIndexes[x] not in self.visitedNodesIndexes):
+                    self.destroyWallBetweenNodes(node, self.mazeArray[legalNeighborIndexes[x]])
+                    self.buildPaths(self.mazeArray[legalNeighborIndexes[x]])
 
     # defines method for tearing down a node wall
     def destroyWallBetweenNodes(self, node1, node2):
@@ -123,11 +92,27 @@ class Maze:
             node1.setTopWalkable()
             node2.setBottomWalkable()
 
+    # defines method for getting the list of mazeArray indexes of legal neighbor nodes (if those neighbors exist)
+    def getLegalNeighborIndexes(self, node):
+        legalNeighbors = []
+
+        # if node's neighbor is legal, exists and isn't the previous visited node, then add it to neighborNodesIndexes
+        if node.hasLeftNeighbor():
+            legalNeighbors.append(node.getLeftNeighborIndex(self.totalCols))
+        if node.hasRightNeighbor(self.totalCols):
+            legalNeighbors.append(node.getRightNeighborIndex(self.totalCols))
+        if node.hasTopNeighbor():
+            legalNeighbors.append(node.getTopNeighborIndex(self.totalCols))
+        if node.hasBottomNeighbor(self.totalRows):
+            legalNeighbors.append(node.getBottomNeighborIndex(self.totalRows, self.totalCols))
+
+        return legalNeighbors
+
     # defines method for getting the mazeArray list
     def getMazeArray(self):
         return self.mazeArray
 
-    # defines method for getting a node's mazeArray index
+    # defines method for getting a node's mazeArray index given it's rowPosition and colPosition
     def getNodeIndex(self, rowPos, colPos):
         # Given an M*N grid with M rows and N columns and given a grid element (R, C), where R
         # is in [0, M) and C is in [0, N), finding the element's index I in an ordered list
