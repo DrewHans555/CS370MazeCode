@@ -24,8 +24,6 @@ class Maze:
         randomNode = self.mazeArray[randrange(len(self.mazeArray))]
         self.buildPaths(randomNode, -1)  # build paths using recursion
 
-        self.printMazePicture()
-
     # defines representation for Python Interpreter
     def __repr__(self):
         return [self.mazeArray]
@@ -60,7 +58,7 @@ class Maze:
 
     # defines method for building paths using a recursive depth-first-search algorithm
     def buildPaths(self, node, previousIndex):
-        self.visitedNodesIndexs.append(node)
+        self.visitedNodesIndexs.append(self.getNodeIndex(node.getRowPosition(), node.getColPosition()))
         neighborNodesIndexs = []
 
         leftNeighborRowPos = node.getLeftNeighborRowPosition()
@@ -71,28 +69,27 @@ class Maze:
         topNeighborColPos = node.getTopNeighborColPosition()
         bottomNeighborRowPos = node.getBottomNeighborRowPosition(self.totalRows)
         bottomNeighborColPos = node.getBottomNeighborColPosition(self.totalRows)
-		
-		leftNeighborIndex = self.getNodeIndex(leftNeighborRowPos, leftNeighborColPos)
-		rightNeighborIndex = self.getNodeIndex(rightNeighborRowPos, rightNeighborColPos)
-		topNeighborIndex = self.getNodeIndex(topNeighborRowPos, topNeighborColPos)
-		bottomNeighborIndex = self.getNodeIndex(bottomNeighborRowPos, bottomNeighborColPos)
-		
-		
 
         # if node's neighbor is legal, exists and isn't the previous visited node, then add it to neighborNodesIndexs
-        if ((leftNeighborRowPos is not None) and (leftNeighborColPos is not None) and (leftNeighborIndex != previousIndex)):
-            neighborNodesIndexs.append(leftNeighborIndex)
-        if ((rightNeighborRowPos is not None) and (rightNeighborColPos is not None) and (rightNeighborIndex != previousIndex)):
-            neighborNodesIndexs.append(rightNeighborIndex)
-        if ((topNeighborRowPos is not None) and (topNeighborColPos is not None) and (topNeighborIndex != previousIndex)):
-            neighborNodesIndexs.append(topNeighborIndex)
-        if ((bottomNeighborRowPos is not None) and (bottomNeighborColPos is not None) and (bottomNeighborIndex != previousIndex)):
-            neighborNodesIndexs.append(bottomNeighborIndex)
+        if ((leftNeighborRowPos is not None) and (leftNeighborColPos is not None) and (
+                self.getNodeIndex(leftNeighborRowPos, leftNeighborColPos) != previousIndex)):
+            neighborNodesIndexs.append(self.getNodeIndex(leftNeighborRowPos, leftNeighborColPos))
+        if ((rightNeighborRowPos is not None) and (rightNeighborColPos is not None) and (
+                self.getNodeIndex(rightNeighborRowPos, rightNeighborColPos) != previousIndex)):
+            neighborNodesIndexs.append(self.getNodeIndex(rightNeighborRowPos, rightNeighborColPos))
+        if ((topNeighborRowPos is not None) and (topNeighborColPos is not None) and (
+                self.getNodeIndex(topNeighborRowPos, topNeighborColPos) != previousIndex)):
+            neighborNodesIndexs.append(self.getNodeIndex(topNeighborRowPos, topNeighborColPos))
+        if ((bottomNeighborRowPos is not None) and (bottomNeighborColPos is not None) and (
+                self.getNodeIndex(bottomNeighborRowPos, bottomNeighborColPos) != previousIndex)):
+            neighborNodesIndexs.append(self.getNodeIndex(bottomNeighborRowPos, bottomNeighborColPos))
 
         # if there are one or more legal neighbor nodes to explore then select one from neighborNodesIndexs 
-		# and destroyWallBetweenNodes then call buildPaths using the new node
-		# else you've reached a dead end and should backtrack to previous node
-        if neighborNodesIndexs:
+        # and destroyWallBetweenNodes then call buildPaths using the new node
+        # else you've reached a dead end and should backtrack to previous node
+        if not neighborNodesIndexs:
+            pass
+        else:
             # randomize list of neighborNodesIndexs to ensure random paths are generated
             shuffle(neighborNodesIndexs)
 
@@ -101,7 +98,8 @@ class Maze:
                 # if neighbor x has not been visited then tear down the wall between it and node
                 if (neighborNodesIndexs[x] not in self.visitedNodesIndexs):
                     self.destroyWallBetweenNodes(node, self.mazeArray[neighborNodesIndexs[x]])
-                    self.buildPaths(self.mazeArray[neighborNodesIndexs[x]], self.getNodeIndex(node))
+                    self.buildPaths(self.mazeArray[neighborNodesIndexs[x]],
+                                    self.getNodeIndex(node.getRowPosition(), node.getColPosition()))
 
     # defines method for tearing down a node wall
     def destroyWallBetweenNodes(self, node1, node2):
@@ -109,7 +107,7 @@ class Maze:
         if node1.isLeftOf(node2):
             node1.setRightWalkable()
             node2.setLeftWalkable()
-            
+
         # if node2 is right of node1 then destroy wall between node2 left and node1 right
         if node1.isRightOf(node2):
             node1.setLeftWalkable()
