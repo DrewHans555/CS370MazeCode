@@ -1,30 +1,29 @@
-# This class creates a Maze Node object that knows it's position in the maze array.
-# Each Maze Node should be thought of as an open space surrounded by four walls with 
-# the position (rowPosition, colPosition) in a maze of size (totalRows, totalCols).
-# When you want to open up a walkable path between two nodes you must set the 
-# nodes opposite walkable boolean variables to TRUE (so rightWalkable = True for node 1
-# and leftWalkable = True for node 2 implies that there is no wall between nodes 1 and 2).
+# This class creates a Maze Node object that knows it's row position in the maze, column position in the maze,
+# it's index in the maze array, which of it's four walls are opened and closed, and whether it is the start of
+# the maze or the end of the maze or neither. Each Maze Node should be thought of as an open space surrounded
+# by four walls with it's position being (rowPosition, colPosition) in a maze of size (totalRows, totalCols)
+# and it's index in the maze array being equal to (rowPosition * totalCols + colPosition).
+#                         +--+
+#  node representation =  |  |  where -- and | represent walls and spaces are walkable space
+#                         +--+
+# Note:  if sideWalkable = False then a wall exists on that side
+#    and if sideWalkable = True then no wall exists on that side
 
 class MazeNode:
     # defines constructor for MazeNode class
-    def __init__(self, rowPos=0, colPos=0):
+    def __init__(self, rowPos=0, colPos=0, index=-1):
         self.isStartOfMaze = False
         self.isEndOfMaze = False
 
         self.rowPosition = rowPos
         self.colPosition = colPos
+        self.indexInMazeArray = index
 
         # walkable = False means that a wall exists between nodes
         self.leftWalkable = False
         self.rightWalkable = False
         self.topWalkable = False
         self.bottomWalkable = False
-
-        # openable = True means that a path can be created
-        self.leftOpenable = True
-        self.rightOpenable = True
-        self.topOpenable = True
-        self.bottomOpenable = True
 
     # defines representation for Python Interpreter
     def __repr__(self):
@@ -34,6 +33,10 @@ class MazeNode:
     def __str__(self):
         return "(" + str(self.rowPosition) + "," + str(self.colPosition) + ")"
 
+    # defines the method for getting the node's index in the mazeArray
+    def getIndexInMazeArray(self):
+        return self.indexInMazeArray
+
     # defines the method for getting the node's row position
     def getRowPosition(self):
         return self.rowPosition
@@ -42,77 +45,34 @@ class MazeNode:
     def getColPosition(self):
         return self.colPosition
 
-    # defines method for getting position of MazeNode's left neighbor's rowPosition
-    def getLeftNeighborRowPosition(self):
-        if (self.colPosition - 1) >= 0:
-            return self.rowPosition
+    # defines method for getting position of MazeNode's left neighbor's index in the mazeArray
+    def getLeftNeighborIndex(self, totalMazeCols):
+        if self.hasLeftNeighbor():
+            return (self.rowPosition * int(totalMazeCols)) + (self.colPosition - 1)
         else:
-            return None
+            return -1
 
-    # defines method for getting position of MazeNode's left neighbor's colPosition
-    def getLeftNeighborColPosition(self):
-        if (self.colPosition - 1) >= 0:
-            return self.colPosition - 1
+    # defines method for getting position of MazeNode's left neighbor's index in the mazeArray
+    def getTopNeighborIndex(self, totalMazeCols):
+        if self.hasTopNeighbor():
+            return ((self.rowPosition - 1) * int(totalMazeCols)) + self.colPosition
         else:
-            return None
+            return -1
 
-    # defines method for getting position of MazeNode's top neighbor's rowPosition
-    def getTopNeighborRowPosition(self):
-        if (self.rowPosition - 1) >= 0:
-            return self.rowPosition - 1
+    # defines method for getting position of MazeNode's left neighbor's index in the mazeArray
+    def getRightNeighborIndex(self, totalMazeCols):
+        if self.hasRightNeighbor(totalMazeCols):
+            return (self.rowPosition * int(totalMazeCols)) + (self.colPosition + 1)
         else:
-            return None
+            return -1
 
-    # defines method for getting position of MazeNode's top neighbor's colPosition
-    def getTopNeighborColPosition(self):
-        if (self.rowPosition - 1) >= 0:
-            return self.colPosition
+            # defines method for getting position of MazeNode's left neighbor's index in the mazeArray
+
+    def getBottomNeighborIndex(self, totalMazeRows, totalMazeCols):
+        if self.hasBottomNeighbor(totalMazeRows):
+            return ((self.rowPosition + 1) * int(totalMazeCols)) + self.colPosition
         else:
-            return None
-
-    # defines method for getting position of MazeNode's right neighbor's rowPosition
-    def getRightNeighborRowPosition(self, totalMazeCols):
-        if (self.colPosition + 1) < totalMazeCols:
-            return self.rowPosition
-        else:
-            return None
-
-    # defines method for getting position of MazeNode's right neighbor's colPosition
-    def getRightNeighborColPosition(self, totalMazeCols):
-        if (self.colPosition + 1) < totalMazeCols:
-            return self.colPosition + 1
-        else:
-            return None
-
-    # defines method for getting position of MazeNode's bottom neighbor's rowPosition
-    def getBottomNeighborRowPosition(self, totalMazeRows):
-        if (self.rowPosition + 1) < totalMazeRows:
-            return self.rowPosition + 1
-        else:
-            return None
-
-    # defines method for getting position of MazeNode's bottom neighbor's colPosition
-    def getBottomNeighborColPosition(self, totalMazeRows):
-        if (self.rowPosition + 1) < totalMazeRows:
-            return self.colPosition
-        else:
-            return None
-
-    # defines method for getting leftOpenable value
-    def getLeftOpenable(self):
-        return self.leftOpenable
-
-    # defines method for getting rightOpenable value
-    def getRightOpenable(self):
-        return self.rightOpenable
-
-    # defines method for getting topOpenable value
-    def getTopOpenable(self):
-        return self.topOpenable
-
-    # defines method for getting bottomOpenable value
-    def getBottomOpenable(self):
-        return self.bottomOpenable
+            return -1
 
     # defines method for getting leftWalkable value
     def getLeftWalkable(self):
@@ -130,6 +90,22 @@ class MazeNode:
     def getBottomWalkable(self):
         return self.bottomWalkable
 
+    # defines method for knowing if this node has a left neighbor
+    def hasLeftNeighbor(self):
+        return (self.colPosition - 1) >= 0
+
+    # defines method for knowing if this node has a right neighbor
+    def hasRightNeighbor(self, totalMazeCols):
+        return (self.colPosition + 1) < totalMazeCols
+
+    # defines method for knowing if this node has a right neighbor
+    def hasTopNeighbor(self):
+        return (self.rowPosition - 1) >= 0
+
+    # defines method for knowing if this node has a right neighbor
+    def hasBottomNeighbor(self, totalMazeRows):
+        return (self.rowPosition + 1) < totalMazeRows
+
     # defines method for knowing if this node is the start of the maze
     def isStartOfMaze(self):
         return self.isStartOfMaze
@@ -142,41 +118,25 @@ class MazeNode:
     def isLeftOf(self, anotherNode):
         # if MazeNode is left of anotherNode then return True
         return ((self.getRowPosition() == anotherNode.getRowPosition()) and (
-        self.getColPosition() + 1 == anotherNode.getColPosition()))
+            self.getColPosition() + 1 == anotherNode.getColPosition()))
 
     # defines method for knowing if this node is to the right of anotherNode
     def isRightOf(self, anotherNode):
         # if MazeNode is right of anotherNode then return True
         return ((self.getRowPosition() == anotherNode.getRowPosition()) and (
-        self.getColPosition() - 1 == anotherNode.getColPosition()))
+            self.getColPosition() - 1 == anotherNode.getColPosition()))
 
     # defines method for knowing if this node is above anotherNode
     def isAboveOf(self, anotherNode):
         # if MazeNode is above of anotherNode then return True
         return ((self.getRowPosition() + 1 == anotherNode.getRowPosition()) and (
-        self.getColPosition() == anotherNode.getColPosition()))
+            self.getColPosition() == anotherNode.getColPosition()))
 
     # defines method for knowing if this node is below anotherNode
     def isBelowOf(self, anotherNode):
         # if MazeNode is below of anotherNode then return True
         return ((self.getRowPosition() - 1 == anotherNode.getRowPosition()) and (
-        self.getColPosition() == anotherNode.getColPosition()))
-
-    # defines method for knowing if a path can be made to the Maze Node's left neighbor
-    def setLeftOpenable(self, boolean):
-        self.leftOpenable = boolean
-
-    # defines method for knowing if a path can be made to the Maze Node's right neighbor
-    def setRightOpenable(self, boolean):
-        self.rightOpenable = boolean
-
-    # defines method for knowing if a path can be made to the Maze Node's top neighbor
-    def setTopOpenable(self, boolean):
-        self.topOpenable = boolean
-
-    # defines method for knowing if a path can be made to the Maze Node's bottom neighbor
-    def setBottomOpenable(self, boolean):
-        self.bottomOpenable = boolean
+            self.getColPosition() == anotherNode.getColPosition()))
 
     # defines method for opening up a walkable path between Maze Node's left neighbor
     def setLeftWalkable(self):
@@ -197,11 +157,9 @@ class MazeNode:
     # defines method for setting the node as the start of the maze
     def setAsStartOfMaze(self):
         self.isStartOfMaze = True
-        self.setTopOpenable(True)
         self.setTopWalkable()
 
     # defines method for setting the node as the end of the maze
     def setAsEndOfMaze(self):
         self.isEndOfMaze = True
-        self.setBottomOpenable(True)
         self.setBottomWalkable()
