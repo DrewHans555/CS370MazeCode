@@ -35,4 +35,8 @@ class CodeDriver:
     def outputResults(self):
         pass
 
-CodeDriver().generateMaze(10, 10)
+driver = CodeDriver()
+driver.generateMaze(10, 15)
+#driver.solveMaze()
+
+
