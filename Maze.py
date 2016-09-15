@@ -18,11 +18,17 @@ class Maze:
         if self.totalRows * self.totalCols > sys.getrecursionlimit():
             sys.setrecursionlimit(self.totalRows * self.totalCols + 5)
 
-        # add nodes to the mazeArray
+        # add stackOfNodes to the mazeArray
         self.addNodes()
 
         # pick a random node and start building paths using recursion
         self.buildPaths(self.mazeArray[randrange(len(self.mazeArray))])
+
+        # pick a random node in first row to start from
+        self.createStart()
+
+        # pick a random node in last row to end from
+        self.createEnd()
 
     # defines representation for Python Interpreter
     def __repr__(self):
@@ -35,7 +41,7 @@ class Maze:
             text = text + self.mazeArray[x]
         return text
 
-    # defines method for adding nodes to mazeArray list
+    # defines method for adding stackOfNodes to mazeArray list
     def addNodes(self):
         index = 0
         for x in range(self.totalRows):
@@ -50,14 +56,14 @@ class Maze:
 
         legalNeighborIndexes = self.getLegalNeighborIndexes(node)
 
-        # if there are one or more legal neighbor nodes to explore then select one from neighborNodesIndexes
+        # if there are one or more legal neighbor stackOfNodes to explore then select one from neighborNodesIndexes
         # and destroyWallBetweenNodes then call buildPaths using the new node
         # else you've reached a dead end and should backtrack to previous node
         if not legalNeighborIndexes:
-            # if there are no legal neighbor nodes then backtrack to previous node
+            # if there are no legal neighbor stackOfNodes then backtrack to previous node
             pass
         else:
-            # if there are is one or more legal neighbor nodes to explore
+            # if there are is one or more legal neighbor stackOfNodes to explore
             # then randomly pick one and buildPaths recursively
 
             # randomize list of neighborNodesIndexes to ensure random paths are generated
@@ -92,7 +98,19 @@ class Maze:
             node1.setTopWalkable()
             node2.setBottomWalkable()
 
-    # defines method for getting the list of mazeArray indexes of legal neighbor nodes (if those neighbors exist)
+    # defines method for creating a start node
+    def createStart(self):
+        startNodeIndex = randrange(self.totalCols)
+        startNode = self.mazeArray[startNodeIndex]
+        startNode.setAsStartOfMaze()
+
+    # defines method for creating an end node
+    def createEnd(self):
+        endNodeIndex = (int(self.totalRows - 1) * int(self.totalCols)) + randrange(self.totalCols)
+        endNode = self.mazeArray[endNodeIndex]
+        endNode.setAsEndOfMaze()
+
+    # defines method for getting the list of mazeArray indexes of legal neighbor stackOfNodes (if those neighbors exist)
     def getLegalNeighborIndexes(self, node):
         legalNeighbors = []
 
@@ -142,25 +160,25 @@ class Maze:
                     # recall: index for a grid item in an ordered list I = rowPos*totalCols + colPos
                     currentNode = self.mazeArray[r * self.totalCols + c]
                     if (x == 0 and currentNode.getTopWalkable() == False):
-                        print("+--", end="")
+                        print("+---", end="")
                     if (x == 0 and currentNode.getTopWalkable() == True):
-                        print("+  ", end="")
+                        print("+   ", end="")
                     if (x == 0 and c == self.totalCols - 1):
                         print("+", end="")
                         print("")
 
                     if (x == 1 and currentNode.getLeftWalkable() == False):
-                        print("|  ", end="")
+                        print("|   ", end="")
                     if (x == 1 and currentNode.getLeftWalkable() == True):
-                        print("   ", end="")
+                        print("    ", end="")
                     if (x == 1 and c == self.totalCols - 1):
                         print("|", end="")
                         print("")
 
                     if ((x == 2 and r == self.totalRows - 1) and currentNode.getBottomWalkable() == False):
-                        print("+--", end="")
+                        print("+---", end="")
                     if ((x == 2 and r == self.totalRows - 1) and currentNode.getBottomWalkable() == True):
-                        print("+  ", end="")
+                        print("+   ", end="")
                     if ((x == 2 and r == self.totalRows - 1) and c == self.totalCols - 1):
                         print("+", end="")
                         print("")
