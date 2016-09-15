@@ -9,6 +9,7 @@
 # Note:  if sideWalkable = False then a wall exists on that side
 #    and if sideWalkable = True then no wall exists on that side
 
+
 class MazeNode:
     # defines constructor for MazeNode class
     def __init__(self, rowPos=0, colPos=0, index=-1):
@@ -19,11 +20,17 @@ class MazeNode:
         self.colPosition = colPos
         self.indexInMazeArray = index
 
-        # walkable = False means that a wall exists between nodes
+        # walkable = False means that a wall exists between stackOfNodes
         self.leftWalkable = False
         self.rightWalkable = False
         self.topWalkable = False
         self.bottomWalkable = False
+
+        # fValue is used when solving with A*
+        self.fValue = -1
+
+        # parentIndex is used when solving with A*
+        self.parentIndex = -1
 
     # defines representation for Python Interpreter
     def __repr__(self):
@@ -39,11 +46,11 @@ class MazeNode:
 
     # defines the method for getting the node's row position
     def getRowPosition(self):
-        return self.rowPosition
+        return int(self.rowPosition)
 
     # defines the method for getting the node's column position
     def getColPosition(self):
-        return self.colPosition
+        return int(self.colPosition)
 
     # defines method for getting position of MazeNode's left neighbor's index in the mazeArray
     def getLeftNeighborIndex(self, totalMazeCols):
@@ -89,6 +96,14 @@ class MazeNode:
     # defines method for getting bottomWalkable value
     def getBottomWalkable(self):
         return self.bottomWalkable
+
+    # defines method for getting the node's fValue for A*
+    def getFValue(self):
+        return int(self.fValue)
+
+    # defines method for getting the node's parent's index
+    def getParentIndex(self):
+        return self.parentIndex
 
     # defines method for knowing if this node has a left neighbor
     def hasLeftNeighbor(self):
@@ -153,6 +168,14 @@ class MazeNode:
     # defines method for opening up a walkable path between Maze Node's bottom neighbor
     def setBottomWalkable(self):
         self.bottomWalkable = True
+
+    # defines method for setting the node's fValue for A*
+    def setFValue(self, newValue):
+        self.fValue = newValue
+
+    # defines method for setting the node's parentIndex
+    def setParentIndex(self, index):
+        self.parentIndex = index
 
     # defines method for setting the node as the start of the maze
     def setAsStartOfMaze(self):
