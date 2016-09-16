@@ -32,7 +32,7 @@ class Maze:
 
     # defines representation for Python Interpreter
     def __repr__(self):
-        return [self.mazeArray]
+        return self.mazeArray
 
     # defines the string that gets displayed when printing the maze object
     def __str__(self):
