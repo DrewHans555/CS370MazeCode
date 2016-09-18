@@ -2,53 +2,42 @@
 
 from Maze import Maze
 from MazeSolver import MazeSolver
+from time import clock
 
 
 class CodeDriver:
     # defines constructor for MazeGenerator class
     def __init__(self):
-        self.listOfMazeNodes = []
-        self.mazeRows = -1
-        self.mazeCols = -1
+        pass
 
     # defines representation for Python Interpreter
     def __repr__(self):
-        return self.listOfMazeNodes
+        return self
 
-    # defines method for getting the listOfMazeNodes 
-    def getMazeNodes(self):
-        return self.listOfMazeNodes
-
-    # defines method for getting the number of maze rows after generateMaze is called
-    def getMazeRows(self):
-        return self.mazeRows
-
-    # defines method for getting the number of maze cols after generateMaze is called
-    def getMazeCols(self):
-        return self.mazeCols
-
-    # defines method for building a new maze
+    # defines method for building a new maze object
     def generateMaze(self, totalRows, totalCols):
-        # get the list of MazeNodes from new
-        maze = Maze(totalRows, totalCols)
-        self.listOfMazeNodes = maze.getMazeArray()
-        self.mazeRows = totalRows
-        self.mazeCols = totalCols
-        maze.printMazePicture()
+        mazeObject = Maze(totalRows, totalCols)
+        return mazeObject
 
-    #
-    def solveMaze(self):
-        solver = MazeSolver(self.listOfMazeNodes, self.mazeRows, self.mazeCols)
+    # defines method for solving the maze with A Star Algorithm
+    def solveMazeWithAStar(self, mazeObject):
+        solver = MazeSolver(mazeObject)
+        startTime = clock()
         path = solver.solveWithAStar()
+        stopTime = clock() - startTime
+        self.printSolveTime("A*", stopTime)
         solver.printSolutionPath(path)
 
-    #
-    def performMultipleTests(self, mazeRows, mazeCols, totalTests):
-        for x in range(totalTests):
-            self.generateMaze(mazeRows, mazeCols)
-            self.solveMaze()
+    # defines method for printing a text picture of the maze
+    def printMazePicture(self, mazeObject):
+        mazeObject.printMazePicture()
+
+    # defines method for printing the time it took to find a solution path
+    def printSolveTime(self, algorithmUsed, solveTime):
+        print("A solution path was found with " + algorithmUsed + " in " + "{:.2E}".format(solveTime) + " seconds")
 
 
 driver = CodeDriver()
-driver.generateMaze(5, 10)
-driver.solveMaze()
+maze = driver.generateMaze(5, 5)
+driver.printMazePicture(maze)
+driver.solveMazeWithAStar(maze)
