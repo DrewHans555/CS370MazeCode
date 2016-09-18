@@ -102,13 +102,13 @@ class Maze:
     def createStart(self):
         startNodeIndex = randrange(self.totalCols)
         startNode = self.mazeArray[startNodeIndex]
-        startNode.setAsStartOfMaze()
+        startNode.setAsMazeStart()
 
     # defines method for creating an end node
     def createEnd(self):
         endNodeIndex = (int(self.totalRows - 1) * int(self.totalCols)) + randrange(self.totalCols)
         endNode = self.mazeArray[endNodeIndex]
-        endNode.setAsEndOfMaze()
+        endNode.setAsMazeEnd()
 
     # defines method for getting the list of mazeArray indexes of legal neighbor stackOfNodes (if those neighbors exist)
     def getLegalNeighborIndexes(self, node):
