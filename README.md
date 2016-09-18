@@ -1,8 +1,8 @@
 # PytonMazeCode
 This repository contains code written in Python 3.3 for Blackburn College's Fall 2016 Artificial Intelligence class CS370.
 
-I have drastically improved the code for MazeNode.py and Maze.py so now they should be easier to work with.
+Update Sept 16, 2016:  I have drastically improved the code for MazeNode.py and Maze.py so now they should be easier to work with.
 
-I will begin coding the MazeSolver soon!
+Update Sept 18, 2016:  I have successfully coded the MazeSolver's A* algorithm!  The MazeSolver will now find the solution path without error.  This took me way longer to write than it should have but I did it  :D
 
-Also, this project is intended to be interpreted with Python 3.3 +.
+I'll clean up the code sometime in the near future and add lots of comments... but right now I need sleep.
