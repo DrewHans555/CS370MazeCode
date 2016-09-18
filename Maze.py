@@ -13,12 +13,14 @@ class Maze:
         self.visitedNodesIndexes = []
         self.totalRows = totalRows
         self.totalCols = totalCols
+        self.startNodeIndex = -1
+        self.endNodeIndex = -1
 
         # reset the recursion limit for large mazes to prevent crashing
         if self.totalRows * self.totalCols > sys.getrecursionlimit():
             sys.setrecursionlimit(self.totalRows * self.totalCols + 5)
 
-        # add stackOfNodes to the mazeArray
+        # add nodes to the mazeArray
         self.addNodes()
 
         # pick a random node and start building paths using recursion
@@ -72,7 +74,7 @@ class Maze:
             # check every neighbor node at least once for an unvisited node to buildPaths
             for x in range(len(legalNeighborIndexes)):
                 # if neighbor x has not been visited then tear down the wall between it and node
-                if (legalNeighborIndexes[x] not in self.visitedNodesIndexes):
+                if legalNeighborIndexes[x] not in self.visitedNodesIndexes:
                     self.destroyWallBetweenNodes(node, self.mazeArray[legalNeighborIndexes[x]])
                     self.buildPaths(self.mazeArray[legalNeighborIndexes[x]])
 
@@ -101,14 +103,14 @@ class Maze:
     # defines method for creating a start node
     def createStart(self):
         startNodeIndex = randrange(self.totalCols)
-        startNode = self.mazeArray[startNodeIndex]
-        startNode.setAsMazeStart()
+        self.mazeArray[startNodeIndex].setAsMazeStart()
+        self.startNodeIndex = startNodeIndex
 
     # defines method for creating an end node
     def createEnd(self):
         endNodeIndex = (int(self.totalRows - 1) * int(self.totalCols)) + randrange(self.totalCols)
-        endNode = self.mazeArray[endNodeIndex]
-        endNode.setAsMazeEnd()
+        self.mazeArray[endNodeIndex].setAsMazeEnd()
+        self.endNodeIndex = endNodeIndex
 
     # defines method for getting the list of mazeArray indexes of legal neighbor stackOfNodes (if those neighbors exist)
     def getLegalNeighborIndexes(self, node):
@@ -136,6 +138,14 @@ class Maze:
         # is in [0, M) and C is in [0, N), finding the element's index I in an ordered list
         # of all grid elements of M*N grid is given by I = R*N + C.
         return ((rowPos * int(self.totalCols)) + colPos)
+
+    # defines method for getting the start node index in mazeArray
+    def getStartNodeIndex(self):
+        return self.startNodeIndex
+
+    # defines method for getting the end node index in mazeArray
+    def getEndNodeIndex(self):
+        return self.endNodeIndex
 
     # defines method for getting the number of totalNodes in maze
     def getTotalNodes(self):
