@@ -3,9 +3,9 @@
 # the maze or the end of the maze or neither. Each Maze Node should be thought of as an open space surrounded
 # by four walls with it's position being (rowPosition, colPosition) in a maze of size (totalRows, totalCols)
 # and it's index in the maze array being equal to (rowPosition * totalCols + colPosition).
-#                         +--+
-#  node representation =  |  |  where -- and | represent walls and spaces are walkable space
-#                         +--+
+#                         +---+
+#  node representation =  |   |  where -- and | represent walls and spaces are walkable space
+#                         +---+
 # Note:  if sideWalkable = False then a wall exists on that side
 #    and if sideWalkable = True then no wall exists on that side
 
@@ -26,8 +26,10 @@ class MazeNode:
         self.topWalkable = False
         self.bottomWalkable = False
 
-        # fValue is used when solving with A*
-        self.fValue = -1
+        # values are used when solving with A*
+        self.fValue = -1  # gValue + hValue
+        self.gValue = -1  # movement cost to move from the parent node to this node
+        self.hValue = -1  # estimated movement cost to move from this node to the end node
 
         # parentIndex is used when solving with A*
         self.parentIndex = -1
@@ -44,13 +46,13 @@ class MazeNode:
     def getIndexInMazeArray(self):
         return self.indexInMazeArray
 
-    # defines the method for getting the node's row position
-    def getRowPosition(self):
-        return int(self.rowPosition)
-
     # defines the method for getting the node's column position
     def getColPosition(self):
-        return int(self.colPosition)
+        return self.colPosition
+
+    # defines the method for getting the node's row position
+    def getRowPosition(self):
+        return self.rowPosition
 
     # defines method for getting position of MazeNode's left neighbor's index in the mazeArray
     def getLeftNeighborIndex(self, totalMazeCols):
@@ -101,6 +103,14 @@ class MazeNode:
     def getFValue(self):
         return int(self.fValue)
 
+    # defines method for getting the node's gValue for A*
+    def getGValue(self):
+        return int(self.gValue)
+
+    # defines method for getting the node's hValue for A*
+    def getHValue(self):
+        return int(self.hValue)
+
     # defines method for getting the node's parent's index
     def getParentIndex(self):
         return self.parentIndex
@@ -122,11 +132,11 @@ class MazeNode:
         return (self.rowPosition + 1) < totalMazeRows
 
     # defines method for knowing if this node is the start of the maze
-    def isStartOfMaze(self):
+    def isMazeStart(self):
         return self.isStartOfMaze
 
     # defines method for knowing if this node is the end of the maze
-    def isEndOfMaze(self):
+    def isMazeEnd(self):
         return self.isEndOfMaze
 
     # defines method for knowing if this node is to the left of anotherNode
@@ -173,16 +183,24 @@ class MazeNode:
     def setFValue(self, newValue):
         self.fValue = newValue
 
+    # defines method for setting the node's gValue for A*
+    def setGValue(self, newValue):
+        self.gValue = newValue
+
+    # defines method for setting the node's hValue for A*
+    def setHValue(self, newValue):
+        self.hValue = newValue
+
     # defines method for setting the node's parentIndex
     def setParentIndex(self, index):
         self.parentIndex = index
 
     # defines method for setting the node as the start of the maze
-    def setAsStartOfMaze(self):
+    def setAsMazeStart(self):
         self.isStartOfMaze = True
         self.setTopWalkable()
 
     # defines method for setting the node as the end of the maze
-    def setAsEndOfMaze(self):
+    def setAsMazeEnd(self):
         self.isEndOfMaze = True
         self.setBottomWalkable()
