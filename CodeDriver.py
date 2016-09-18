@@ -31,15 +31,16 @@ class CodeDriver:
     def generateMaze(self, totalRows, totalCols):
         # get the list of MazeNodes from new
         maze = Maze(totalRows, totalCols)
-        maze.printMazePicture()
         self.listOfMazeNodes = maze.getMazeArray()
+        self.mazeRows = totalRows
+        self.mazeCols = totalCols
+        maze.printMazePicture()
 
     #
     def solveMaze(self):
         solver = MazeSolver(self.listOfMazeNodes, self.mazeRows, self.mazeCols)
         path = solver.solveWithAStar()
         solver.printSolutionPath(path)
-
 
     #
     def performMultipleTests(self, mazeRows, mazeCols, totalTests):
@@ -49,5 +50,5 @@ class CodeDriver:
 
 
 driver = CodeDriver()
-driver.generateMaze(10, 15)
+driver.generateMaze(5, 10)
 driver.solveMaze()
