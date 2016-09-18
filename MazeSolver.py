@@ -7,25 +7,14 @@ import queue
 
 class MazeSolver:
     # defines constructor for MazeGenerator class
-    def __init__(self, mazeArray, mazeRows, mazeCols):
-        self.longestSolveTime = 0.0
-        self.fastestSolveTime = 0.0
-        self.averageSolveTime = 0.0
-
-        self.mazeNodes = mazeArray
-        self.mazeRows = mazeRows
-        self.mazeCols = mazeCols
-
-        self.startIndex = -1
-        self.endIndex = -1
+    def __init__(self, mazeObject):
+        self.mazeNodes = mazeObject.getMazeArray()
+        self.mazeRows = mazeObject.getTotalRows()
+        self.mazeCols = mazeObject.getTotalCols()
+        self.startIndex = mazeObject.getStartNodeIndex()
+        self.endIndex = mazeObject.getEndNodeIndex()
 
         self.solutionPath = []
-
-        for x in range(len(self.mazeNodes)):
-            if self.mazeNodes[x].isMazeStart():
-                self.startIndex = x
-            if self.mazeNodes[x].isMazeEnd():
-                self.endIndex = x
 
     # defines representation for Python Interpreter
     def __repr__(self):
@@ -135,15 +124,16 @@ class MazeSolver:
 
     # defines method for getting the cost it takes to get from current node to a given node
     def calculateGValue(self, node, givenNode):
+        gValueOfThisNode = node.getGValue()
         if givenNode.isAboveOf(node):
-            # moving upwards takes you farther from the bottom row where the goalNode (so high cost)
-            return 20
+            # moving upwards takes you farther from the bottom row where the goalNode (so higher cost)
+            return gValueOfThisNode + 20
         elif givenNode.isLeftOf(node) or givenNode.isRightOf(node):
             # moving left or right keeps you at the same level (so moderate cost)
-            return 15
+            return gValueOfThisNode + 15
         elif givenNode.isBelowOf(node):
-            # moving down gets you closer to the bottom row where the goalNode is (so low cost)
-            return 10
+            # moving down gets you closer to the bottom row where the goalNode is (so lower cost)
+            return gValueOfThisNode + 10
         else:
             return -1
 
@@ -178,14 +168,13 @@ class MazeSolver:
         with q.mutex:
             return not (x in q.queue)
 
-    #
+    # defines method for printing out the solution path
     def printSolutionPath(self, path):
+        printCount = 0
         print("Solution:  ")
-        print(str(path))
-
-    # defines method for printing out the solve time information
-    def printSolveTime(self, algorithm):
-        print(algorithm + " results: ")
-        print("    -longestSolveTime = " + str(self.longestSolveTime))
-        print("    -fastestSolveTime = " + str(self.longestSolveTime))
-        print("    -averageSolveTime = " + str(self.longestSolveTime))
+        for x in range(len(path)):
+            print(path[x], end="")
+            printCount = printCount + 1
+            if printCount == 10:
+                print("")
+                printCount = 0
