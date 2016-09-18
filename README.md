@@ -1,4 +1,4 @@
-# PytonMazeCode
+# PythonMazeCode
 This repository contains code written in Python 3.3 for Blackburn College's Fall 2016 Artificial Intelligence class CS370.
 
 Update Sept 16, 2016:  I have drastically improved the code for MazeNode.py and Maze.py so now they should be easier to work with.
