@@ -20,37 +20,83 @@ class MazeSolver:
     def __repr__(self):
         return self
 
-    # defines method for finding a path from the start node to the end node
-    def depthFirstSearchWithStack(self):
-        pass
+    # defines method for solving with a recursive depth-first search algorithm
+    def solveWithDFS(self):
+        # set up visitedNodes list and start node
+        visitedNodes = []
+        startNode = self.mazeNodes[self.startIndex]
+        # do the recursive depth-first search
+        self.depthFirstSearch(startNode, visitedNodes)
+        return self.solutionPath
 
-    # defines method for finding a path from the start node to the end node
-    def depthFirstSearchWithRecursion(self):
-        pass
+    # defines method for getting the solution path with DFS
+    def depthFirstSearch(self, node, visitedNodes):
+        visitedNodes.append(node.getIndexInMazeArray())
+        legalNeighbors = self.getWalkableNeighborNodes(node)
 
-    # defines method for finding a path from the start node to the end node
-    def breadthFirstSearchWithQueue(self):
-        pass
+        if legalNeighbors:
+            # for each neighbor node
+            for x in range(len(legalNeighbors)):
+                neighborNodeIndex = legalNeighbors[x]
+                neighborNode = self.mazeNodes[neighborNodeIndex]
 
-    # defines method for finding a path from the start node to the end node
-    def breadthFirstSearchWithRecursion(self):
-        pass
+                if neighborNode.isMazeEnd():
+                    neighborNode.setParentIndex(node.getIndexInMazeArray())
+                    return self.getSolutionPath(neighborNode)
+                if neighborNodeIndex not in visitedNodes:
+                    neighborNode.setParentIndex(node.getIndexInMazeArray())
+                    self.depthFirstSearch(neighborNode, visitedNodes)
 
-    # defines method for finding a solution path with a recursive A* Algorithm
+    # defines method for solving with a recursive breadth-first search algorithm
+    def solveWithBFS(self):
+        # set up checkedNodes list, neighborNodes list, and start node for breadthFirstSearch
+        checkedNodes = []
+        uncheckedNodes = []
+        uncheckedNodes.append(self.startIndex)
+
+        # now that setup is complete do the recursive depth-first search
+        self.breadthFirstSearch(checkedNodes, uncheckedNodes)
+        return self.solutionPath
+
+    # defines method for getting the solution path with BFS
+    def breadthFirstSearch(self, checkedNodes, uncheckedNodes):
+        nodeIndex = uncheckedNodes.pop()
+        node = self.mazeNodes[nodeIndex]
+
+        legalNeighbors = self.getWalkableNeighborNodes(node)
+        if legalNeighbors:
+            # for each neighbor node
+            for x in range(len(legalNeighbors)):
+                neighborNodeIndex = legalNeighbors[x]
+                neighborNode = self.mazeNodes[neighborNodeIndex]
+
+                if neighborNode.isMazeEnd():
+                    neighborNode.setParentIndex(nodeIndex)
+                    return self.getSolutionPath(neighborNode)
+                if neighborNodeIndex not in checkedNodes:
+                    neighborNode.setParentIndex(nodeIndex)
+                    uncheckedNodes.append(neighborNodeIndex)
+        checkedNodes.append(node.getIndexInMazeArray())
+        self.breadthFirstSearch(checkedNodes, uncheckedNodes)
+
+    # defines method for solving with a recursive A* Algorithm
     def solveWithAStar(self):
-        # priority queue that stores the cost value and index of nodes
+        # set up openNodePQ priority queue and checkedNodes list for aStarSearch
         openNodePQ = queue.PriorityQueue(0)
+        checkedNodes = []
+
+        # set the values for the starting node and put it in the priority queue
         self.mazeNodes[self.startIndex].setFValue(0)
         self.mazeNodes[self.startIndex].setGValue(0)
         self.mazeNodes[self.startIndex].setHValue(0)
         openNodePQ.put([0, self.startIndex])
-        checkedNodes = []
 
+        # now that setup is complete do the recursive A* search
         self.aStarSearch(openNodePQ, checkedNodes)
 
         return self.solutionPath
 
-    # defines method for finding a path from the start node to the end node
+    # defines method for getting the solution path with a recursive A* Algorithm
     def aStarSearch(self, openNodesPQ, checkedNodes):
         # get the node index with lowest f value in openNodesPQ
         lowestFValueIndex = openNodesPQ.get()[1]
@@ -69,6 +115,7 @@ class MazeSolver:
                 # if end is found then stop searching and return the solution path
                 if neighborNode.isMazeEnd():
                     neighborNode.setParentIndex(currentNode.getIndexInMazeArray())
+
                     return self.getSolutionPath(neighborNode)
 
                 if neighborNodeIndex not in checkedNodes and self.is_not_in_queue(neighborNodeIndex, openNodesPQ):
@@ -135,6 +182,7 @@ class MazeSolver:
             # moving down gets you closer to the bottom row where the goalNode is (so lower cost)
             return gValueOfThisNode + 10
         else:
+            # only return -1 if something goes horribly wrong
             return -1
 
     # defines method for getting the heuristic value of a node
@@ -145,12 +193,13 @@ class MazeSolver:
         return abs(node.getRowPosition() - goalNode.getRowPosition()) + abs(
             node.getColPosition() - goalNode.getColPosition())
 
-    # http://stackoverflow.com/questions/22737111/check-if-something-is-already-in-priority-queue-python
+    # defines method for getting the solution path after the maze has been solved
     def getSolutionPath(self, node):
         # add node path from end to start
         string = "(" + str(node.getRowPosition()) + "," + str(node.getColPosition()) + ")"
         self.solutionPath.append(string)
 
+        # if node's parent index = -1 then you've reached the start node
         if node.getParentIndex() == -1:
             # reverse the list so that it prints the path from start node to end node
             self.solutionPath.reverse()
@@ -159,22 +208,13 @@ class MazeSolver:
             self.getSolutionPath(self.mazeNodes[node.getParentIndex()])
 
     # defines method for knowing if x is in a q
+    # http://stackoverflow.com/questions/22737111/check-if-something-is-already-in-priority-queue-python
     def is_in_queue(self, x, q):
         with q.mutex:
             return x in q.queue
 
     # defines method for knowing if x is not in a q
+    # http://stackoverflow.com/questions/22737111/check-if-something-is-already-in-priority-queue-python
     def is_not_in_queue(self, x, q):
         with q.mutex:
             return not (x in q.queue)
-
-    # defines method for printing out the solution path
-    def printSolutionPath(self, path):
-        printCount = 0
-        print("Solution:  ")
-        for x in range(len(path)):
-            print(path[x], end="")
-            printCount = printCount + 1
-            if printCount == 10:
-                print("")
-                printCount = 0
