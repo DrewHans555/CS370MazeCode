@@ -2,7 +2,8 @@
 # and which of their sides have walls or walkable space), and returns a solution to the maze using a path-finding
 # algorithm (depth-first-search, breadth-first-search, A*, etc.).
 
-import queue
+from collections import deque  # needed for creating a queue for breadth first search
+import queue  # needed for creating a priority queue for a star
 
 
 class MazeSolver:
@@ -23,18 +24,21 @@ class MazeSolver:
 
     # defines method for solving with a recursive depth-first search algorithm
     def solveWithDFS(self):
-        # set up visitedNodes list and start node
+        # set up visitedNodes stack and start node
         visitedNodes = []
-        startNode = self.mazeNodes[self.startIndex]
+        visitedNodes.append(self.startIndex)
+
         # do the recursive depth-first search
-        self.depthFirstSearch(startNode, visitedNodes)
+        self.depthFirstSearch(visitedNodes)
         return self.solutionPath
 
     # defines method for getting the solution path with DFS
-    def depthFirstSearch(self, node, visitedNodes):
+    def depthFirstSearch(self, visitedNodes):
         self.nodesExplored = self.nodesExplored + 1
-        visitedNodes.append(node.getIndexInMazeArray())
+        nodeIndex = visitedNodes.pop()
+        node = self.mazeNodes[nodeIndex]
         legalNeighbors = self.getWalkableNeighborNodes(node)
+        visitedNodes.append(nodeIndex)
 
         if legalNeighbors:
             # for each neighbor node
@@ -47,13 +51,14 @@ class MazeSolver:
                     return self.getSolutionPath(neighborNode)
                 if neighborNodeIndex not in visitedNodes:
                     neighborNode.setParentIndex(node.getIndexInMazeArray())
-                    self.depthFirstSearch(neighborNode, visitedNodes)
+                    visitedNodes.append(neighborNodeIndex)
+                    self.depthFirstSearch(visitedNodes)
 
     # defines method for solving with a recursive breadth-first search algorithm
     def solveWithBFS(self):
-        # set up checkedNodes list, neighborNodes list, and start node for breadthFirstSearch
+        # set up checkedNodes list and uncheckedNodes queue for breadthFirstSearch
         checkedNodes = []
-        uncheckedNodes = []
+        uncheckedNodes = deque()
         uncheckedNodes.append(self.startIndex)
 
         # now that setup is complete do the recursive depth-first search
@@ -63,7 +68,7 @@ class MazeSolver:
     # defines method for getting the solution path with BFS
     def breadthFirstSearch(self, checkedNodes, uncheckedNodes):
         self.nodesExplored = self.nodesExplored + 1
-        nodeIndex = uncheckedNodes.pop()
+        nodeIndex = uncheckedNodes.popleft()
         node = self.mazeNodes[nodeIndex]
 
         legalNeighbors = self.getWalkableNeighborNodes(node)
