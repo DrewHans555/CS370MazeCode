@@ -26,6 +26,7 @@ class CodeDriver:
         path = solver.solveWithDFS()
         stopTime = clock() - startTime
         self.printSolveTime("Depth-First Search", stopTime)
+        self.printNodesExplored("Depth-First Search", solver.getNodesExplored())
         self.printSolutionPath(path)
 
     # defines method for solving the maze with breadth-first search algorithm
@@ -35,6 +36,7 @@ class CodeDriver:
         path = solver.solveWithBFS()
         stopTime = clock() - startTime
         self.printSolveTime("Breadth-First Search", stopTime)
+        self.printNodesExplored("Breadth-First Search", solver.getNodesExplored())
         self.printSolutionPath(path)
 
     # defines method for solving the maze with A Star Algorithm
@@ -44,6 +46,7 @@ class CodeDriver:
         path = solver.solveWithAStar()
         stopTime = clock() - startTime
         self.printSolveTime("A*", stopTime)
+        self.printNodesExplored("A*", solver.getNodesExplored())
         self.printSolutionPath(path)
 
     # defines method for solving the maze with all algorithms once
@@ -52,33 +55,40 @@ class CodeDriver:
         bfsSolver = MazeSolver(mazeObject)
         aStarSolver = MazeSolver(mazeObject)
 
-        dfsstartTime = clock()
+        dfsStartTime = clock()
         dfsPath = dfsSolver.solveWithDFS()
-        dfsstopTime = clock() - dfsstartTime
-        self.printSolveTime("Depth-First Search", dfsstopTime)
+        dfsStopTime = clock() - dfsStartTime
+        self.printSolveTime("Depth-First Search", dfsStopTime)
+        self.printNodesExplored("Depth-First Search", dfsSolver.getNodesExplored())
         self.printSolutionPath(dfsPath)
 
-        bfsstartTime = clock()
+        bfsStartTime = clock()
         bfsPath = bfsSolver.solveWithBFS()
-        bfsstopTime = clock() - bfsstartTime
-        self.printSolveTime("Breadth-First Search", bfsstopTime)
+        bfsStopTime = clock() - bfsStartTime
+        self.printSolveTime("Breadth-First Search", bfsStopTime)
+        self.printNodesExplored("Breadth-First Search", bfsSolver.getNodesExplored())
         self.printSolutionPath(bfsPath)
 
         # solve with A*, printSolveTime
-        astarstartTime = clock()
+        astarStartTime = clock()
         aStarPath = aStarSolver.solveWithAStar()
-        astarstopTime = clock() - astarstartTime
-        self.printSolveTime("A*", astarstopTime)
+        astarStopTime = clock() - astarStartTime
+        self.printSolveTime("A*", astarStopTime)
+        self.printNodesExplored("A*", aStarSolver.getNodesExplored())
         self.printSolutionPath(aStarPath)
 
     # defines method for printing a text picture of the maze
     def printMazePicture(self, mazeObject):
         mazeObject.printMazePicture()
 
+    # defines method for printing a text picture of the maze
+    def printNodesExplored(self, algorithmUsed, value):
+        print(algorithmUsed + " explored " + str(value) + " distinct nodes")
+
     # defines method for printing out the solution path
     def printSolutionPath(self, path):
         printCount = 0
-        print("Solution Path from StartNode to EndNode:  ")
+        print("Path found:  ")
         for x in range(len(path)):
             print(path[x], end="")
             printCount = printCount + 1
@@ -90,11 +100,11 @@ class CodeDriver:
     # defines method for printing the time it took to find a solution path
     def printSolveTime(self, algorithmUsed, solveTime):
         print("")
-        print("A solution path was found with " + algorithmUsed + " in " + "{:.2E}".format(solveTime) + " seconds")
+        print(algorithmUsed + " solved in " + "{:.2E}".format(solveTime) + " seconds")
 
 
 driver = CodeDriver()
-maze = driver.generateMaze(10, 10)
+maze = driver.generateMaze(5, 7)
 driver.printMazePicture(maze)
 # driver.solveMazeWithAStar(maze)
 # driver.solveMazeWithDFS(maze)
