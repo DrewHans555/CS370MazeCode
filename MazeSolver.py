@@ -14,6 +14,7 @@ class MazeSolver:
         self.startIndex = mazeObject.getStartNodeIndex()
         self.endIndex = mazeObject.getEndNodeIndex()
 
+        self.nodesExplored = 0
         self.solutionPath = []
 
     # defines representation for Python Interpreter
@@ -31,6 +32,7 @@ class MazeSolver:
 
     # defines method for getting the solution path with DFS
     def depthFirstSearch(self, node, visitedNodes):
+        self.nodesExplored = self.nodesExplored + 1
         visitedNodes.append(node.getIndexInMazeArray())
         legalNeighbors = self.getWalkableNeighborNodes(node)
 
@@ -60,6 +62,7 @@ class MazeSolver:
 
     # defines method for getting the solution path with BFS
     def breadthFirstSearch(self, checkedNodes, uncheckedNodes):
+        self.nodesExplored = self.nodesExplored + 1
         nodeIndex = uncheckedNodes.pop()
         node = self.mazeNodes[nodeIndex]
 
@@ -98,6 +101,8 @@ class MazeSolver:
 
     # defines method for getting the solution path with a recursive A* Algorithm
     def aStarSearch(self, openNodesPQ, checkedNodes):
+        self.nodesExplored = self.nodesExplored + 1
+
         # get the node index with lowest f value in openNodesPQ
         lowestFValueIndex = openNodesPQ.get()[1]
         currentNode = self.mazeNodes[lowestFValueIndex]
@@ -174,10 +179,10 @@ class MazeSolver:
         gValueOfThisNode = node.getGValue()
         if givenNode.isAboveOf(node):
             # moving upwards takes you farther from the bottom row where the goalNode (so higher cost)
-            return gValueOfThisNode + 20
+            return gValueOfThisNode + 10
         elif givenNode.isLeftOf(node) or givenNode.isRightOf(node):
             # moving left or right keeps you at the same level (so moderate cost)
-            return gValueOfThisNode + 15
+            return gValueOfThisNode + 10
         elif givenNode.isBelowOf(node):
             # moving down gets you closer to the bottom row where the goalNode is (so lower cost)
             return gValueOfThisNode + 10
@@ -192,6 +197,10 @@ class MazeSolver:
         goalNode = self.mazeNodes[self.endIndex]
         return abs(node.getRowPosition() - goalNode.getRowPosition()) + abs(
             node.getColPosition() - goalNode.getColPosition())
+
+    # defines method for getting the total number of nodes explored while solving
+    def getNodesExplored(self):
+        return self.nodesExplored
 
     # defines method for getting the solution path after the maze has been solved
     def getSolutionPath(self, node):
