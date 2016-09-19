@@ -104,7 +104,7 @@ class CodeDriver:
 
 
 driver = CodeDriver()
-maze = driver.generateMaze(5, 7)
+maze = driver.generateMaze(10, 20)
 driver.printMazePicture(maze)
 # driver.solveMazeWithAStar(maze)
 # driver.solveMazeWithDFS(maze)
