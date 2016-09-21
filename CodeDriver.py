@@ -3,6 +3,7 @@
 from Maze import Maze
 from MazeSolver import MazeSolver
 from time import clock
+import sys
 
 
 class CodeDriver:
@@ -77,6 +78,40 @@ class CodeDriver:
         self.printNodesExplored("A*", aStarSolver.getNodesExplored())
         self.printSolutionPath(aStarPath)
 
+    #
+    def runAStarTest(self, mazeRows, mazeCols, numberOfTests):
+        totalNodes = mazeRows * mazeCols
+        totalVisitedNodes = 0
+        totalSolveTime = 0
+
+        # reset the recursion limit for large mazes to prevent crashing
+        if totalNodes > sys.getrecursionlimit():
+            sys.setrecursionlimit(totalNodes + 5)
+
+        print("Running AStar Test...")
+        testStartTime = clock()  # get the time before you run all tests
+        for x in range(numberOfTests):
+            maze = Maze(mazeRows, mazeCols)  # create new maze object
+            solver = MazeSolver(maze)  # create new solver object
+            startTime = clock()  # get the time right before solving
+            path = solver.solveWithAStar()  # solve the new maze with AStar
+            solveTime = clock() - startTime  # get the time spent solving
+
+            # get test x data
+            visitedNodes = solver.getNodesExplored()
+            totalSolveTime = totalSolveTime + solveTime
+            totalVisitedNodes = totalVisitedNodes + visitedNodes
+
+        testFinishTime = clock() - testStartTime  # get the time after you run all tests
+        solveTimeAverage = totalSolveTime / numberOfTests
+        spaceComplexityAverage = totalVisitedNodes / (totalNodes * numberOfTests)
+
+        print("Finished AStar Test in  " + "{:.4E}".format(testFinishTime) + " seconds")
+        print("-Total Number of Tests performed:  " + str(numberOfTests))
+        print("-Average Solve Time:  " + "{:.4E}".format(solveTimeAverage) + " seconds")
+        print("-Average Percent of Nodes Visited:  " + str(spaceComplexityAverage * 100) + " %")
+
+
     # defines method for printing a text picture of the maze
     def printMazePicture(self, mazeObject):
         mazeObject.printMazePicture()
@@ -104,9 +139,10 @@ class CodeDriver:
 
 
 driver = CodeDriver()
-maze = driver.generateMaze(10, 20)
-driver.printMazePicture(maze)
+# maze = driver.generateMaze(10, 20)
+# driver.printMazePicture(maze)
 # driver.solveMazeWithAStar(maze)
 # driver.solveMazeWithDFS(maze)
 # driver.solveMazeWithBFS(maze)
-driver.solveMazeWithAll(maze)
+# driver.solveMazeWithAll(maze)
+driver.runAStarTest(10, 10, 10000)
