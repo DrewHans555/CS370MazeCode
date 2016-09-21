@@ -4,6 +4,7 @@
 
 from collections import deque  # needed for creating a queue for breadth first search
 import queue  # needed for creating a priority queue for a star
+import sys
 
 
 class MazeSolver:
@@ -15,6 +16,10 @@ class MazeSolver:
         self.startIndex = mazeObject.getStartNodeIndex()
         self.endIndex = mazeObject.getEndNodeIndex()
 
+        # reset the recursion limit for large mazes to prevent crashing
+        if self.mazeRows * self.mazeCols > sys.getrecursionlimit():
+            sys.setrecursionlimit(self.mazeRows * self.mazeCols + 5)
+
         self.nodesExplored = 0
         self.solutionPath = []
 
@@ -24,72 +29,96 @@ class MazeSolver:
 
     # defines method for solving with a recursive depth-first search algorithm
     def solveWithDFS(self):
-        # set up visitedNodes stack and start node
-        visitedNodes = []
-        visitedNodes.append(self.startIndex)
+        # set up visitedNodes stack and push start node's index
+        stack = []
+        stack.append(self.startIndex)
 
-        # do the recursive depth-first search
-        self.depthFirstSearch(visitedNodes)
+        # now that setup is complete do the recursive depth-first search
+        self.depthFirstSearch(stack)
         return self.solutionPath
 
     # defines method for getting the solution path with DFS
-    def depthFirstSearch(self, visitedNodes):
+    def depthFirstSearch(self, stack):
         self.nodesExplored = self.nodesExplored + 1
-        nodeIndex = visitedNodes.pop()
-        node = self.mazeNodes[nodeIndex]
-        legalNeighbors = self.getWalkableNeighborNodes(node)
-        visitedNodes.append(nodeIndex)
 
-        if legalNeighbors:
+        # get the last added node index from the stack
+        nodeIndex = stack.pop()
+        node = self.mazeNodes[nodeIndex]
+
+        # get the neighbor node indexes of neighbors that can be walked to from current node
+        neighborNodeIndexes = self.getLegalNeighborNodeIndexes(node)
+
+        # add the current node index to the stack of visited node's indexes
+        stack.append(nodeIndex)
+
+        if neighborNodeIndexes:
             # for each neighbor node
-            for x in range(len(legalNeighbors)):
-                neighborNodeIndex = legalNeighbors[x]
+            for x in range(len(neighborNodeIndexes)):
+                neighborNodeIndex = neighborNodeIndexes[x]
                 neighborNode = self.mazeNodes[neighborNodeIndex]
 
                 if neighborNode.isMazeEnd():
+                    # set parent index for getting the solution path
                     neighborNode.setParentIndex(node.getIndexInMazeArray())
                     return self.getSolutionPath(neighborNode)
-                if neighborNodeIndex not in visitedNodes:
+                if neighborNodeIndex not in stack:
+                    # set parent index for getting the solution path later
                     neighborNode.setParentIndex(node.getIndexInMazeArray())
-                    visitedNodes.append(neighborNodeIndex)
-                    self.depthFirstSearch(visitedNodes)
+
+                    # add the unvisited node index to the stack to be carried to the next dfs iteration
+                    stack.append(neighborNodeIndex)
+
+                    # do dfs for last neighborNodeIndex pushed to the stack
+                    self.depthFirstSearch(stack)
 
     # defines method for solving with a recursive breadth-first search algorithm
     def solveWithBFS(self):
-        # set up checkedNodes list and uncheckedNodes queue for breadthFirstSearch
+        # set up checkedNodes list and uncheckedNodesQ queue and then enqueue start node's index
         checkedNodes = []
-        uncheckedNodes = deque()
-        uncheckedNodes.append(self.startIndex)
+        uncheckedNodesQ = deque()
+        uncheckedNodesQ.append(self.startIndex)
 
         # now that setup is complete do the recursive depth-first search
-        self.breadthFirstSearch(checkedNodes, uncheckedNodes)
+        self.breadthFirstSearch(checkedNodes, uncheckedNodesQ)
         return self.solutionPath
 
     # defines method for getting the solution path with BFS
-    def breadthFirstSearch(self, checkedNodes, uncheckedNodes):
+    def breadthFirstSearch(self, checkedNodes, uncheckedNodesQ):
         self.nodesExplored = self.nodesExplored + 1
-        nodeIndex = uncheckedNodes.popleft()
+
+        # get the first added node index from the queue
+        nodeIndex = uncheckedNodesQ.popleft()
         node = self.mazeNodes[nodeIndex]
 
-        legalNeighbors = self.getWalkableNeighborNodes(node)
-        if legalNeighbors:
+        # get the neighbor node indexes of neighbors that can be walked to from current node
+        neighborNodeIndexes = self.getLegalNeighborNodeIndexes(node)
+
+        # add the current node index to the queue of checked node's indexes
+        checkedNodes.append(nodeIndex)
+
+        if neighborNodeIndexes:
             # for each neighbor node
-            for x in range(len(legalNeighbors)):
-                neighborNodeIndex = legalNeighbors[x]
+            for x in range(len(neighborNodeIndexes)):
+                neighborNodeIndex = neighborNodeIndexes[x]
                 neighborNode = self.mazeNodes[neighborNodeIndex]
 
                 if neighborNode.isMazeEnd():
+                    # set parent index for getting the solution path
                     neighborNode.setParentIndex(nodeIndex)
                     return self.getSolutionPath(neighborNode)
                 if neighborNodeIndex not in checkedNodes:
+                    # set parent index for getting the solution path
                     neighborNode.setParentIndex(nodeIndex)
-                    uncheckedNodes.append(neighborNodeIndex)
-        checkedNodes.append(node.getIndexInMazeArray())
-        self.breadthFirstSearch(checkedNodes, uncheckedNodes)
+
+                    # add the unchecked node index to the queue to be carried to the next bfs iteration
+                    uncheckedNodesQ.append(neighborNodeIndex)
+
+        # do bfs for first neighborNodeIndex in the queue
+        self.breadthFirstSearch(checkedNodes, uncheckedNodesQ)
 
     # defines method for solving with a recursive A* Algorithm
     def solveWithAStar(self):
-        # set up openNodePQ priority queue and checkedNodes list for aStarSearch
+        # set up openNodePQ priority queue and checkedNodes list
         openNodePQ = queue.PriorityQueue(0)
         checkedNodes = []
 
@@ -108,28 +137,25 @@ class MazeSolver:
     def aStarSearch(self, openNodesPQ, checkedNodes):
         self.nodesExplored = self.nodesExplored + 1
 
-        # get the node index with lowest f value in openNodesPQ
-        lowestFValueIndex = openNodesPQ.get()[1]
-        currentNode = self.mazeNodes[lowestFValueIndex]
+        # get the node index with lowest f value from the openNodesPQ
+        nodeIndex = openNodesPQ.get()[1]
+        currentNode = self.mazeNodes[nodeIndex]
 
-        # get the legal walkable neighbor node indexes
-        neighborNodeIndexes = self.getWalkableNeighborNodes(currentNode)
+        # get the neighbor node indexes of neighbors that can be walked to from current node
+        neighborNodeIndexes = self.getLegalNeighborNodeIndexes(currentNode)
 
-        # if there are walkable neighbor nodes to explore
         if neighborNodeIndexes:
             # for each neighbor node
             for x in range(len(neighborNodeIndexes)):
                 neighborNodeIndex = neighborNodeIndexes[x]
                 neighborNode = self.mazeNodes[neighborNodeIndex]
 
-                # if end is found then stop searching and return the solution path
                 if neighborNode.isMazeEnd():
+                    # set parent index for getting the solution path
                     neighborNode.setParentIndex(currentNode.getIndexInMazeArray())
-
                     return self.getSolutionPath(neighborNode)
-
                 if neighborNodeIndex not in checkedNodes and self.is_not_in_queue(neighborNodeIndex, openNodesPQ):
-                    # set the neighbor node's parent to the currentNode's index
+                    # set parent index for getting the solution path
                     neighborNode.setParentIndex(currentNode.getIndexInMazeArray())
 
                     # set the neighbor node's fValue, gValue, and hValue
@@ -146,7 +172,7 @@ class MazeSolver:
                     # check to see if this new path to the neighborNode is better than previous path
                     newGValue = self.calculateGValue(currentNode, neighborNode)
                     if newGValue < neighborNode.getGValue():
-                        # set the neighbor node's parent to the currentNode's index
+                        # set parent index for getting the solution path
                         neighborNode.setParentIndex(currentNode.getIndexInMazeArray())
 
                         # set the neighbor node's fValue, gValue, and hValue
@@ -156,13 +182,13 @@ class MazeSolver:
 
                         # when finished add it to the priority queue then go to next neighbor
                         openNodesPQ.put([newFValue, neighborNodeIndex])
-            # add current node to checkedNodes after exploring all neighbors
+                # add current node to checkedNodes after exploring all neighbors
             checkedNodes.append(currentNode.getIndexInMazeArray())
-            # use recursion to do the next lowest fValue node in openNodesPQ
+            # do a* for the next lowest fValue node in openNodesPQ
             self.aStarSearch(openNodesPQ, checkedNodes)
 
     # define method getting the indexs of legal, walkable neighbor nodes
-    def getWalkableNeighborNodes(self, currentNode):
+    def getLegalNeighborNodeIndexes(self, currentNode):
         walkableNeighbors = []
 
         # if node's neighbor is legal, exists and isn't the previous visited node, then add it to neighborNodesIndexes
@@ -184,13 +210,13 @@ class MazeSolver:
         gValueOfThisNode = node.getGValue()
         if givenNode.isAboveOf(node):
             # moving upwards takes you farther from the bottom row where the goalNode (so higher cost)
-            return gValueOfThisNode + 10
+            return gValueOfThisNode + 25
         elif givenNode.isLeftOf(node) or givenNode.isRightOf(node):
             # moving left or right keeps you at the same level (so moderate cost)
-            return gValueOfThisNode + 10
+            return gValueOfThisNode + 15
         elif givenNode.isBelowOf(node):
             # moving down gets you closer to the bottom row where the goalNode is (so lower cost)
-            return gValueOfThisNode + 10
+            return gValueOfThisNode + 5
         else:
             # only return -1 if something goes horribly wrong
             return -1
