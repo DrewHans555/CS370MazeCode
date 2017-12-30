@@ -1,4 +1,4 @@
-# This class drives the PythonMazeCode classes
+# This class drives the MazePyathFinding classes
 
 from Maze import Maze
 from MazeSolver import MazeSolver
@@ -7,7 +7,7 @@ import sys
 
 
 class CodeDriver:
-    # defines constructor for MazeGenerator class
+    # defines constructor for CodeDriver class
     def __init__(self):
         pass
 
