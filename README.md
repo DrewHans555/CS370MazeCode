@@ -3,7 +3,7 @@ MazePyathFinding (pronounced Maze Path Finding) is a small program I wrote in Py
 
 Graph traversal algorithms implemented: depth-first search, breadth-first search, and A* search.
 
-## Prerequisites
+### Prerequisites
 * Python 3.3 or higher
 
 ## License
